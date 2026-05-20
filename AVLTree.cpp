@@ -64,7 +64,7 @@ void AVLTree::printInorder(AVLNode* node, int indent){
         if (key < node->key) { //αν η λεξη ειναι λεξοκογραφικά μικρότερη -> αριστερο φύλλο
             node-> left = insertHelper(node->left, key, heightIncreased);
 
-                //έλεγχος εάν έγινε η εισαγωγή πιο κάτω και α΄θξησε το ύψος του αριστερού κλαδιού 
+                //έλεγχος εάν έγινε η εισαγωγή πιο κάτω και αύξησε το ύψος του αριστερού κλαδιού 
                 if (heightIncreased){
                     node->bf +=1; 
 
@@ -144,5 +144,117 @@ void AVLTree::printInorder(AVLNode* node, int indent){
 
         return leftChild; //Επιστρέφουμε την ρίζα του υποδέντρου
     }
+
+
+    AVLNode* AVLTree::removeHelper(AVLNode* node, const string&key, bool& heightDecreased){
+
+        //Senario 1: δεν βρέθηκε η λέξη στο δέντρο
+        if (node == nullptr) {
+            heightDecreased = false;
+            return nullptr;
+        }
+
+
+        //Αναζήτηση κόμβου
+         if (key < node->key) { //αν η λεξη ειναι λεξοκογραφικά μικρότερη -> αριστερο φύλλο
+            node-> left = insertHelper(node->left, key, heightDecreased);
+
+                if (heightDecreased){ //Κοντυνε το αριστερό κλαδί
+                    node->bf -=1; //άρα γέρνει  τώρα το δέντρο προσ τα δεξιά
+
+                    if (node->bf == -1) {
+                        heightDecreased = false; //Το δέντρο ήταν ίσιο και τωρα έγειρα άρα το συνολικό ύψος δεν μειώθηκε
+                    } else if (node->bf == 0) {
+                        heightDecreased = true; //Το δέντρο έγερνε προσ τα αριστερά και τώρα ισορρόπησε αρα το συνολικό του ύψος μειώθηκε
+                    } else if (node->bf == -2){
+                        //ανισορροπία προσ τα δεξιά
+                        if (node->right->bf <= 0) {
+                            node = rotateLeft(node);
+                            heightDecreased = (node->bf == 0);
+                        } else {
+                            node->right = rotateRight(node->right);
+                            node = rotateLeft(node);
+                            heightDecreased = true; //διπλή περιστροφή άρα το υψος σίγουρα μειώθηκε
+                        }
+
+                    }
+                }
+            } else if (key > node->key) {
+                node->right = removeHelper(node->right, key, heightDecreased);
+                
+                //κόντυνε το δεξί κλαδί
+                if (heightDecreased){
+                    node->bf += 1; 
+
+                    if (node->bf == 1) {
+                        heightDecreased = false;
+                    } else if (node->bf == 0){
+                        heightDecreased = true;
+                    } else {
+                        node->left = rotateLeft(node->left);
+                        node = rotateRight(node);
+                        heightDecreased = true;
+                    }
+                }
+            }   
+
+    } else { //Senario 2: βρέθηκε ο κόμβος για διαγραφή
+        if (node->left = nullptr || node->right == nullptr){
+            AVLNode* temp = node->left ? node->left : node->right;
+
+            if (temp == nullptr) { //αν ο κόμβος δεν έχει παιδιά
+                temp = node;
+            node = nullptr;
+        } else { //αν ο κόμβος έχει ένα παιδί
+            *node = *temp //αντιγράφουμε το περιεχόμενο του κόμβου node στο περιεχόμενο του τρέχοντα κόμβου
+            }
+
+        delete temp; 
+        heightDecreased = true ;
+        } else { //αν έχει 2 παιδιά
+            AVLNode* temp = findMin(node->right);
+            node->key = temp->key //ανταλλαγη των δεδομένων του κομβου-διαδοχοσ με τον τρέχον κόμβο
+            node->right = removeHelper(node->right, temp->key, heightDecreased);
+
+            if (heightDecreased){
+                node->bf+= 1;
+                if (node->bf == 1){
+                    heightDecreased = false; 
+                } else if (node->bf == 0) {
+                    heightDecreased = true;
+                } else if (node->bf == 2){
+                    if (node->left->bf >=0){
+                        node = rotateRight(node);
+                        heightDecreased = (node->bf ==0);
+                    } else {
+                        node->left = rotateLeft(node->left);
+                        node = rotateRight(node);
+                        heightDecreased = true;
+                    }
+                }
+            }
+        }
+        return node;
+    }
     
-    void AVLTree::remove(const string& key){}
+
+
+    AVLNode* AVLTree::findMin(AVLNode* node) const {
+        while (node && node->left !=nullptr){
+            node = node->left;
+        }
+        return node;
+    }
+    void AVLTree::remove(const string& key){
+        //αν το δέντρο είναι άδειο δεν μπορουμε να προχωρήσουμε σε διαγραφή λέξης
+        if (root == nullptr) {
+            cout<<"Σφάλμα: Το δέντρο είναι ήδη άδειο. Δεν είναι δυνατή η διαγραφή της λέξης " << key<< "\n";
+            return;
+        }
+
+        bool heightDecreased = false;
+
+        root = removeHelper(root, key, heightDecreased);
+
+
+    }

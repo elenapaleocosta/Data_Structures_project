@@ -11,6 +11,8 @@ class AVLTree{
     //ορισμός δείκτη ρίζας δέντρου 
     AVLNode* root;
 
+    AVLNode* findMin(AVLNode* node) const;
+
     AVLNode* rotateRight(AVLNode* parent);
     AVLNode* rotateLeft(AVLNode* parent);
 
