@@ -1,15 +1,45 @@
-#include "AVLTree.h"
+#include "AVLNode.h"
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 using namespace std;
 
+
+class AVLTree {
+    public: 
+        AVLTree();
+        ~AVLTree();
+
+        void insert(const string& key);
+        void remove(const string& key);
+        void display() const;
+        AVLNode* getRoot() const;
+
+        bool isBalanced() const;
+        bool verifyBF() const;
+
+    private:
+        AVLNode* root;
+
+        void clear(AVLNode* node);
+        void printInorder(AVLNode* node, int indent) const;
+        AVLNode* insertHelper(AVLNode* node, const string& key, bool& heightIncreased);
+        AVLNode* removeHelper(AVLNode* node, const string& key, bool& heightDecreased);
+        AVLNode* rotateLeft(AVLNode* parent);
+        AVLNode* rotateRight(AVLNode* parent);
+        AVLNode* findMin(AVLNode* node) const;
+
+        int getHeightHelper(AVLNode* node) const;
+        bool isBalancedHelper(AVLNode* node) const;
+        bool verifyBFHelper(AVLNode* node) const;
+    };
 // Constructor
 AVLTree::AVLTree() : root(nullptr) {}
 
 // Destructor
 AVLTree::~AVLTree() {
     clear(root);
-}
+};
 
 void AVLTree::clear(AVLNode* node) {
     if (node != nullptr) {
@@ -215,8 +245,9 @@ AVLNode* AVLTree::removeHelper(AVLNode* node, const string& key, bool& heightDec
             }
 
             // Αντικατάσταση με μοναδικό παιδί
-            *node = *temp;
-            delete temp;
+            AVLNode* temp2 = node;
+            node = temp;
+            delete temp2;
             heightDecreased = true;
 
         } else {
@@ -266,4 +297,50 @@ void AVLTree::remove(const string& key) {
 
     bool heightDecreased = false;
     root = removeHelper(root, key, heightDecreased);
+}
+
+//Tree Validators 
+int AVLTree::getHeightHelper(AVLNode* node) const{
+    if (node == nullptr) return 0;
+    return 1 + max(getHeightHelper(node->left) , getHeightHelper(node->right));
+}
+
+//Έλεγχος διαφοράς ύψους να ειναι παντου <=1
+bool AVLTree::isBalancedHelper(AVLNode* node) const {
+    if (node == nullptr) return true;
+
+    int leftHeight = getHeightHelper(node->left);
+    int rightHeight = getHeightHelper(node->right);
+
+if (abs(leftHeight - rightHeight)>1) {
+    return false;
+}
+
+return isBalancedHelper(node->left) && isBalancedHelper(node->right);
+
+}
+
+bool AVLTree::isBalanced() const {
+    return isBalancedHelper(root);
+}
+
+
+bool AVLTree::verifyBFHelper(AVLNode* node) const {
+    if (node == nullptr){
+        return true;
+    }
+
+    int leftHeight = getHeightHelper(node->left);
+    int rightHeight = getHeightHelper(node->right);
+    int BF = leftHeight - rightHeight;
+
+    if (node->bf != BF) {
+        return false;
+    }
+
+    return verifyBFHelper(node->left) && verifyBFHelper(node->right);
+}
+
+bool AVLTree::verifyBF() const {
+    return verifyBFHelper(root);
 }

@@ -1,7 +1,8 @@
-#include "../include/AVLTree.h"
 #include "../include/SearchEngine.h"
+#include "../include/AVLTree.h"
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -70,9 +71,28 @@ int main() {
                 };
                 break;
             };
-            //case 5: {
+            case 5: {
+                tree->display();
 
-            //};
+                cout<<"\n=== AVL Structural Validation ===\n";
+
+                if (tree->isBalanced()) {
+                    cout << "Tree height properties are perfectly balanced (diff<= 1). \n";
+                } else {
+                    cout << "error: Tree is Not balanced!\n";
+                }
+
+                //Ελεγχος balance factor
+
+                if (tree->verifyBF()){
+                    cout << "All stored Balance Factors and mathematically verified.\n";
+                } else {
+                    cout << "error: Discrepancy found is Balance Factors.\n";
+                }
+                cout << "=========================\n\n";
+                break;
+            }
+
             case 0: {
                 exit = false;
                 cout<<"-> Programm Terminated."<<endl;

@@ -28,6 +28,10 @@ class AVLTree{
     //εκτύπωση δεντρου στην κονσόλα
     void printInorder(AVLNode* node, int indent) const;
 
+    int getHeightHelper(AVLNode* node) const;
+    bool isBalancedHelper(AVLNode* node) const;
+    bool verifyBFHelper(AVLNode* node) const;
+    
     public:
     AVLTree(); //Constructor
     ~AVLTree(); //Destructor
@@ -41,6 +45,9 @@ class AVLTree{
 
     //εκτύπωση δέντρου
     void display() const; 
+
+    bool isBalanced() const;
+    bool verifyBF() const;
 };
 
 #endif //AVL_TREE_H
