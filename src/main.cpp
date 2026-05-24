@@ -1,11 +1,12 @@
-#include "AVLTree.h"
+#include "../include/AVLTree.h"
+#include "../include/SearchEngine.h"
 #include <iostream>
 #include <string>
 
 using namespace std;
 
 int main() {
-    AVLTree* tree;
+    AVLTree* tree = new AVLTree();
     bool exit = true;
     while (exit) {
         cout<<"        AVL TREE - BASIC OPERATIONS      "<<endl;
@@ -20,10 +21,65 @@ int main() {
         int choice;
         cout<<"-> Please choose an option from the menu above: "<<endl;
         cin>>choice;
+        cin.ignore();
+        string input_string;
         switch (choice) {
-            case 1:
-                
+            case 1: {
+                cout<<"-> Please type the string you want to insert: "<<endl;
+                getline(cin,input_string);
+                tree->insert(input_string);
+                break;
+            };
+            case 2: {
+                cout<<"-> Please type the string you want to delete: "<<endl;
+                getline(cin,input_string);
+                tree->remove(input_string);
+                break;
+            };
+            case 3: {
+                cout<<"-> Please type the string you want to search: "<<endl;
+                getline(cin,input_string);
+                AVLNode* result = optimizedSearch(tree->getRoot(),input_string,0); 
+                if (result == nullptr) {
+                    cout<<"-> The string: "<<input_string<<" couldn't be found."<<endl;
+                } else {
+                    cout<<"-> The string: "<<input_string<<" was found."<<endl;
+                };
+                break;
+            };
+            case 4: {
+                cout<<"-> Please type the prefix you want to find words related to it: "<<endl;
+                getline(cin,input_string);
+                AVLNode* prefixRoot = findPrefixRoot(tree->getRoot(), input_string);
+                if (prefixRoot == nullptr) {
+                    cout<<"-> No words were found with prefix: "<<input_string<<". Search was unsuccesful."<<endl;
+                } else {
+                    vector<string> matches;
+                    collectPrefixMatches(prefixRoot,input_string,matches);
+                    int size = matches.size();
+                    if (size==0) {
+                        cout<<"-> No words were found with prefix: "<<input_string<<endl;
+                    } else {
+                        cout<<"-> Found: "<<size<<" match(es) with prefix: "<<input_string<<endl;
+                        int i = 0;
+                        while (i<size) {
+                            cout<<i+1<<". "<<matches[i]<<endl;
+                            i ++;
+                        };
+                    };
+                };
+                break;
+            };
+            //case 5: {
+
+            //};
+            case 0: {
+                exit = false;
+                cout<<"-> Programm Terminated."<<endl;
+                break;
+            };
         };
     };
+    delete tree;
     return 0;
 }

@@ -39,9 +39,9 @@ void AVLTree::printInorder(AVLNode* node, int indent) const {
 
 void AVLTree::display() const {
     if (root == nullptr) {
-        cout << "   Το δέντρο είναι άδειο. \n";
+        cout << " The tree is empty. \n";
     } else {
-        cout << " === Δομή Δέντρου ===\n";
+        cout << "=== Tree Structure ===\n";
         // Αρχίζει από indent = 0 
         printInorder(root, 0);
     }
@@ -56,6 +56,7 @@ void AVLTree::insert(const string& key) {
 AVLNode* AVLTree::insertHelper(AVLNode* node, const string& key, bool& heightIncreased) {
     if (node == nullptr) {
         heightIncreased = true; // Νέο φύλλο αυξάνει το ύψος του κλαδιού κατά 1 επίπεδο
+        cout<<"-> The insertion was completed successfully."<<endl;
         return new AVLNode(key); // Δημιουργία κόμβου με bf = 0, left = nullptr, right = nullptr
     }
 
@@ -112,9 +113,10 @@ AVLNode* AVLTree::insertHelper(AVLNode* node, const string& key, bool& heightInc
     } else {
         // Η λέξη υπάρχει ήδη
         heightIncreased = false; // Το ύψος δεν αλλάζει
+        cout<<"-> The insertion was unsuccessful. The given string already exists."<<endl;
         return node;
     }
-
+    
     return node;
 }
 
@@ -153,6 +155,7 @@ AVLNode* AVLTree::rotateLeft(AVLNode* parent) {
 AVLNode* AVLTree::removeHelper(AVLNode* node, const string& key, bool& heightDecreased) {
     if (node == nullptr) {
         heightDecreased = false;
+        cout<<"-> The string: "<<key<<" couln't be found."<<endl;
         return nullptr;
     }
 
@@ -242,6 +245,7 @@ AVLNode* AVLTree::removeHelper(AVLNode* node, const string& key, bool& heightDec
                 }
             }
         }
+        cout<<"-> Deletion of: "<<key<<" was succesful."<<endl;
     }
 
     return node;
@@ -256,7 +260,7 @@ AVLNode* AVLTree::findMin(AVLNode* node) const {
 
 void AVLTree::remove(const string& key) {
     if (root == nullptr) {
-        cout << "Σφάλμα: Το δέντρο είναι ήδη άδειο. Δεν είναι δυνατή η διαγραφή της λέξης " << key << "\n";
+        cout << "-> The tree is empty. Deletion of: "<<key<<" was unsuccessful."<<endl;
         return;
     }
 
