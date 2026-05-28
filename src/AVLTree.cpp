@@ -1,42 +1,14 @@
-#include "AVLNode.h"
+#include "../include/AVLNode.h"
+#include "../include/AVLTree.h"
 #include <iostream>
 #include <algorithm>
 #include <cmath>
 using namespace std;
 
-
-class AVLTree {
-    public: 
-        AVLTree();
-        ~AVLTree();
-
-        void insert(const string& key);
-        void remove(const string& key);
-        void display() const;
-        AVLNode* getRoot() const;
-
-        bool isBalanced() const;
-        bool verifyBF() const;
-
-    private:
-        AVLNode* root;
-
-        void clear(AVLNode* node);
-        void printInorder(AVLNode* node, int indent) const;
-        AVLNode* insertHelper(AVLNode* node, const string& key, bool& heightIncreased);
-        AVLNode* removeHelper(AVLNode* node, const string& key, bool& heightDecreased);
-        AVLNode* rotateLeft(AVLNode* parent);
-        AVLNode* rotateRight(AVLNode* parent);
-        AVLNode* findMin(AVLNode* node) const;
-
-        int getHeightHelper(AVLNode* node) const;
-        bool isBalancedHelper(AVLNode* node) const;
-        bool verifyBFHelper(AVLNode* node) const;
-    };
-// Constructor
+// Κατασκευαστής
 AVLTree::AVLTree() : root(nullptr) {}
 
-// Destructor
+// Καταστροφέας
 AVLTree::~AVLTree() {
     clear(root);
 };
@@ -182,15 +154,20 @@ AVLNode* AVLTree::rotateLeft(AVLNode* parent) {
     return rightChild;
 }
 
-AVLNode* AVLTree::removeHelper(AVLNode* node, const string& key, bool& heightDecreased) {
+// Σημείωση: οι συναρτήσεις περιστροφής αλλάζουν τη δομή
+// του υποδέντρου και ενημερώνουν τους παράγοντες ισορροπίας.
+
+AVLNode* AVLTree::removeHelper(AVLNode* node, const string& key, bool& heightDecreased, bool showMessage) {
     if (node == nullptr) {
         heightDecreased = false;
-        cout<<"-> The string: "<<key<<" couln't be found."<<endl;
+        if (showMessage) {
+            cout<<"-> The string: "<<key<<" couldn't be found."<<endl;
+        }
         return nullptr;
     }
 
     if (key < node->key) {
-        node->left = removeHelper(node->left, key, heightDecreased);
+        node->left = removeHelper(node->left, key, heightDecreased, showMessage);
 
         if (heightDecreased) {
             node->bf -= 1;
@@ -211,7 +188,7 @@ AVLNode* AVLTree::removeHelper(AVLNode* node, const string& key, bool& heightDec
             }
         }
     } else if (key > node->key) {
-        node->right = removeHelper(node->right, key, heightDecreased);
+        node->right = removeHelper(node->right, key, heightDecreased, showMessage);
 
         if (heightDecreased) {
             node->bf += 1;
@@ -234,28 +211,31 @@ AVLNode* AVLTree::removeHelper(AVLNode* node, const string& key, bool& heightDec
     } else {
         if (node->left == nullptr || node->right == nullptr) {
 
-            // Περίπτωση κόμβου με 0 ή 1 παιδί
+            // Περίπτωση κόμβου με 0 ή 1 παιδί: απλή αντικατάσταση/διαγραφή
             AVLNode* temp = node->left ? node->left : node->right;
 
             if (temp == nullptr) {
                 // Κόμβος χωρίς παιδιά
                 delete node;
                 heightDecreased = true;
+                if (showMessage) {
+                    cout << "-> Deletion of: " << key << " was succesful." << endl;
+                }
                 return nullptr;
             }
 
-            // Αντικατάσταση με μοναδικό παιδί
+            // Αντικατάσταση με μοναδικό παιδί (μεταφορά του δείκτη)
             AVLNode* temp2 = node;
             node = temp;
             delete temp2;
             heightDecreased = true;
 
         } else {
-            // Περίπτωση κόμβου με 2 παιδιά
+            // Περίπτωση κόμβου με 2 παιδιά: βρίσκουμε τον ελάχιστο του δεξιού υποδέντρου
             AVLNode* temp = findMin(node->right);
 
             node->key = temp->key;
-            node->right = removeHelper(node->right, temp->key, heightDecreased);
+            node->right = removeHelper(node->right, temp->key, heightDecreased, false);
 
             if (heightDecreased) {
                 node->bf += 1;
@@ -276,7 +256,9 @@ AVLNode* AVLTree::removeHelper(AVLNode* node, const string& key, bool& heightDec
                 }
             }
         }
-        cout<<"-> Deletion of: "<<key<<" was succesful."<<endl;
+        if (showMessage) {
+            cout << "-> Deletion of: " << key << " was succesful." << endl;
+        }
     }
 
     return node;
@@ -291,15 +273,15 @@ AVLNode* AVLTree::findMin(AVLNode* node) const {
 
 void AVLTree::remove(const string& key) {
     if (root == nullptr) {
-        cout << "-> The tree is empty. Deletion of: "<<key<<" was unsuccessful."<<endl;
+        cout << "-> The tree is empty."<<endl;
         return;
     }
 
     bool heightDecreased = false;
-    root = removeHelper(root, key, heightDecreased);
+    root = removeHelper(root, key, heightDecreased, true);
 }
 
-//Tree Validators 
+// Έλεγχοι δέντρου
 int AVLTree::getHeightHelper(AVLNode* node) const{
     if (node == nullptr) return 0;
     return 1 + max(getHeightHelper(node->left) , getHeightHelper(node->right));
@@ -343,4 +325,50 @@ bool AVLTree::verifyBFHelper(AVLNode* node) const {
 
 bool AVLTree::verifyBF() const {
     return verifyBFHelper(root);
+}
+
+void AVLTree::fixTree() {
+    root = fixHelper(root);
+}
+
+AVLNode* AVLTree::fixHelper(AVLNode* node) {
+    if (node==nullptr) {return nullptr;};
+    node->left = fixHelper(node->left);
+    node->right = fixHelper(node->right);
+    int leftHeight = getHeightHelper(node->left);
+    int rightHeight = getHeightHelper(node->right);
+    int real_bf = leftHeight - rightHeight;
+    if (real_bf == 2) { // Αριστερή ανισορροπία
+        int left_child_bf = getHeightHelper(node->left->left) - getHeightHelper(node->left->right);
+        
+        if (left_child_bf >= 0) {
+            // Περίπτωση Left-Left (Μονή δεξιά περιστροφή)
+            node = rotateRight(node);
+        } else {
+            // Περίπτωση Left-Right (Διπλή περιστροφή)
+            node->left = rotateLeft(node->left);
+            node = rotateRight(node);
+        }
+    } 
+    else if (real_bf == -2) { // Δεξιά ανισορροπία
+        int right_child_bf = getHeightHelper(node->right->left) - getHeightHelper(node->right->right);
+        
+        if (right_child_bf <= 0) {
+            // Περίπτωση Right-Right (Μονή αριστερή περιστροφή)
+            node = rotateLeft(node);
+        } else {
+            // Περίπτωση Right-Left (Διπλή περιστροφή)
+            node->right = rotateRight(node->right);
+            node = rotateLeft(node);
+        }
+    }
+    // Ξαναμετράμε τα ύψη γιατί η δομή μπορεί να άλλαξε λόγω των rotate
+    leftHeight = getHeightHelper(node->left);
+    rightHeight = getHeightHelper(node->right);
+    node->bf = leftHeight - rightHeight;
+    return node;
+}
+
+void AVLTree::wrong_input() {
+    cout<<"-> Please insert the right input to continue."<<endl;
 }

@@ -6,6 +6,7 @@
 
 using namespace std;
 
+// Συγκρίνει δύο συμβολοσειρές ξεκινώντας από το δείκτη matched_prefix_len
 inline int compareFromIndex(const string& str1, const string& str2, int matched_prefix_len) {
     int len1 = str1.length();
     int len2 = str2.length();
@@ -19,6 +20,7 @@ inline int compareFromIndex(const string& str1, const string& str2, int matched_
     return (len1 - len2);
 };
 
+// Βελτιστοποιημένη δυαδική αναζήτηση χρησιμοποιώντας γνωστό κοινό πρόθεμα
 inline AVLNode* optimizedSearch(AVLNode* node,const string& target,int matched_len) {
     if (node==nullptr) { 
         return nullptr;
@@ -41,6 +43,7 @@ inline AVLNode* optimizedSearch(AVLNode* node,const string& target,int matched_l
     };
 };
 
+// Βρίσκει έναν κόμβο που ταιριάζει με το πρόθεμα (αν υπάρχει)
 inline AVLNode* findPrefixRoot(AVLNode* node, const string& prefix) {
     if (node == nullptr) {return nullptr;};
     if (node->key.rfind(prefix,0) == 0) {return node;};
@@ -52,6 +55,7 @@ inline AVLNode* findPrefixRoot(AVLNode* node, const string& prefix) {
     }
 };
 
+// Συλλέγει (in-order) όλα τα κλειδιά που ξεκινούν με το δοθέν πρόθεμα
 inline void collectPrefixMatches(AVLNode* node, const string& prefix, vector<string>& results) {
     if (node == nullptr) return;
     if (prefix < node->key || node->key.rfind(prefix,0) == 0) {
