@@ -5,7 +5,7 @@
 #include <vector>
 
 using namespace std;
-
+    
 int main() {
     // Δημιουργία AVL δέντρου
     AVLTree* tree = new AVLTree();
@@ -104,7 +104,7 @@ int main() {
                         tree->display();
                     } 
                     else {
-                        cout<<"Rebalancing canceled by user."<<endl;
+                        cout<<"-> Rebalancing canceled by user."<<endl;
                     };
                 };
                 break;
